@@ -15,14 +15,11 @@ class UploadFile
     protected $destination;
     protected $messages = array();
     protected $maxSize = 102400; // bytes
-    protected $allowedTypes = array(
-        "image/jpeg",
-        "image/pjpeg",
-        "image/gif",
-        "image/png",
-        "application/pdf"
-    );
+    protected $allowedTypes = array("image/jpeg", "image/pjpeg", "image/gif", "image/png", "application/pdf");
     protected $newName;
+    protected $typeCheckingOn = true;
+    protected $riskyTypes = array("bin", "bat", "cgi", "dll", "exe", "js", "pl", "php", "py", "sh");
+    protected $defaultSuffix = ".upload";
 
 
     /**
@@ -108,6 +105,24 @@ class UploadFile
         }
     }
 
+    /**
+     * Method for adding default suffix to uploaded files. Suffix is provided
+     * as argument with leading dot. If dot is omitted method will add it at the
+     * beginning.
+     *
+     * @param null $suffix string
+     */
+    public function allowAllTypes($suffix = null)
+    {
+        $this->typeCheckingOn = false;
+        if ( !is_null($suffix) ) {
+            if ( strpos($suffix, ".") === 0  || $suffix == "" ) {
+                $this->defaultSuffix = $suffix;
+            } else {
+                $this->defaultSuffix = ".$suffix";
+            }
+        }
+    }
 
     /**
      * Calls method for checking file and if error code is 0 calls move method
@@ -149,8 +164,10 @@ class UploadFile
             return false;
         }
 
-        if ( !$this->checkFileType($file) ) {
-            return false;
+        if ( $this->typeCheckingOn ) {
+            if ( !$this->checkFileType($file) ) {
+                return false;
+            }
         }
 
         $this->clearName($file);
