@@ -20,6 +20,7 @@ class UploadFile
     protected $typeCheckingOn = true;
     protected $riskyTypes = array("bin", "bat", "cgi", "dll", "exe", "js", "pl", "php", "py", "sh");
     protected $defaultSuffix = ".upload";
+    protected $renameDuplicates;
 
 
     /**
@@ -125,10 +126,16 @@ class UploadFile
     }
 
     /**
+     * Takes boolean as argument and pass it to the class property. If it's true
+     * files overwrite is disabled and vice versa.
      * Calls method for checking file and if error code is 0 calls move method
+     *
+     * @param bool $renameDuplicates
      */
-    public function upload()
+    public function upload($renameDuplicates = true)
     {
+        $this->renameDuplicates = $renameDuplicates;
+
         $uploadedFile = current($_FILES);
         if ( $this->checkFile($uploadedFile) ) {
             $this->moveFile($uploadedFile);
@@ -246,7 +253,8 @@ class UploadFile
      * Method for replacing white spaces in file name with underscores.
      * Method is also responsible for adding default suffix to new file name
      * if typeCheckingOn is turned off to prevent files with risky extensions
-     * to be uploaded.
+     * to be uploaded. Handles renaming duplicated files if renameDuplicates
+     * property is true
      *
      * @param $file Array
      */
@@ -263,6 +271,23 @@ class UploadFile
         if ( !$this->typeCheckingOn && !empty($this->defaultSuffix) ) {
             if ( in_array($extension, $this->riskyTypes) || empty($extension) ) {
                 $this->newName = $noSpaces . $this->defaultSuffix;
+            }
+        }
+
+        if ( $this->renameDuplicates ) {
+            $name = isset( $this->newName ) ? $this->newName : $file["name"];
+            $existingNames = scandir($this->destination);
+            if ( in_array($name, $existingNames) ) {
+                $i = 1;
+                do {
+                    $this->newName = $nameParts["filename"] . "_" . $i++;
+                    if ( !empty($extension) ) {
+                        $this->newName .= ".$extension";
+                    }
+                    if ( in_array($extension, $this->riskyTypes) ) {
+                        $this->newName .= $this->defaultSuffix;
+                    }
+                } while( in_array($this->newName, $existingNames) );
             }
         }
     }
