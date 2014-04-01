@@ -243,7 +243,10 @@ class UploadFile
 
 
     /**
-     * Method for replacing white spaces in file name with underscores
+     * Method for replacing white spaces in file name with underscores.
+     * Method is also responsible for adding default suffix to new file name
+     * if typeCheckingOn is turned off to prevent files with risky extensions
+     * to be uploaded.
      *
      * @param $file Array
      */
@@ -253,6 +256,14 @@ class UploadFile
         $noSpaces = str_replace(" ", "_", $file["name"]);
         if ( $noSpaces != $file["name"] ) {
             $this->newName = $noSpaces;
+        }
+
+        $nameParts = pathinfo($noSpaces);
+        $extension = isset($nameParts["extension"]) ? $nameParts["extension"] : "";
+        if ( !$this->typeCheckingOn && !empty($this->defaultSuffix) ) {
+            if ( in_array($extension, $this->riskyTypes) || empty($extension) ) {
+                $this->newName = $noSpaces . $this->defaultSuffix;
+            }
         }
     }
 
