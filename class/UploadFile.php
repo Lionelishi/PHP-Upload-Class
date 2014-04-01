@@ -38,14 +38,60 @@ class UploadFile
     }
 
     /**
-     * Method for changing max file size allowed
+     * Method for changing max file size. If the new size exceed server limit
+     * throws new Exception
      *
      * @param $bytes Integer
+     * @throws \Exception
      */
     public function setMaxFileSize($bytes)
     {
+        $serverMaxSize = self::convertToBytes( ini_get("upload_max_filesize") );
+        if ( $bytes > $serverMaxSize ) {
+            throw new \Exception("Maximum size cannot exceed server limit for individual files: " . self::convertFromBytes($serverMaxSize));
+        }
+
         if ( is_numeric($bytes) && $bytes > 0 ) {
             $this->maxSize = $bytes;
+        }
+    }
+
+    /**
+     * Converts max file size configured on server to bytes
+     *
+     * @param $value Mixed file size server limit
+     * @return int size in bytes
+     */
+    public static function convertToBytes($value)
+    {
+        $value = trim($value);
+        $lastChar = strtolower($value[strlen($value) - 1]);
+        if ( in_array($lastChar, array("g", "m", "k")) ) {
+            // Fall-through switch
+            switch ($lastChar) {
+                case "g":
+                    $value *= 1024;
+                case "m":
+                    $value *= 1024;
+                case "k":
+                    $value *= 1024;
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param $bytes integer
+     * @return string size in KB / MB
+     */
+    public static function convertFromBytes($bytes)
+    {
+        $bytes /= 1024;
+        if ( $bytes >= 1024 ) {
+            return number_format($bytes / 1024, 1) . "MB";
+        } else {
+            return number_format($bytes, 1) . "KB";
         }
     }
 
@@ -102,7 +148,7 @@ class UploadFile
         switch( $file["error"] ) {
             case 1:
             case 2:
-                $this->messages[] = $file["name"] . " is too big to upload.";
+                $this->messages[] = $file["name"] . " is too large (max: " . self::convertFromBytes($this->maxSize) . ")";
                 break;
             case 3:
                 $this->messages[] = $file["name"] . " was only partially uploaded.";
