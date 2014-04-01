@@ -295,13 +295,19 @@ class UploadFile
 
     protected function moveFile($file)
     {
-        $message = $file['name'] . " was uploaded successfully";
-        if ( !is_null($this->newName) ) {
-            $message .= ", and was renamed as " . $this->newName;
-        }
-        $message .= ".";
+        $fileName = isset($this->newName) ? $this->newName : $file["name"];
+        $success = move_uploaded_file($file["tmp_name"], $this->destination . $fileName);
+        if ( $success ) {
+            $message = $file['name'] . " was uploaded successfully";
+            if ( !is_null($this->newName) ) {
+                $message .= ", and was renamed as " . $this->newName;
+            }
+            $message .= ".";
 
-        $this->messages[] = $message;
+            $this->messages[] = $message;
+        } else {
+            $this->messages[] = "Unable to upload " . $file["name"];
+        }
     }
 
 } 
