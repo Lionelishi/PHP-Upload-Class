@@ -44,6 +44,10 @@ class UploadFile
         }
     }
 
+    public function getMessages() {
+        return $this->messages;
+    }
+
     /**
      * Takes reference to current file in $_FILES array as argument...
      *
@@ -80,7 +84,7 @@ class UploadFile
 
     protected function moveFile($file)
     {
-        echo $file['name'] . " was uploaded successfully";
+        $this->messages[] = $file['name'] . " was uploaded successfully";
     }
 
 } 
