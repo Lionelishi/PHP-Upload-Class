@@ -15,6 +15,13 @@ class UploadFile
     protected $destination;
     protected $messages = array();
     protected $maxSize = 102400; // bytes
+    protected $allowedTypes = array(
+        "image/jpeg",
+        "image/pjpeg",
+        "image/gif",
+        "image/png",
+        "application/pdf"
+    );
 
 
     /**
@@ -133,11 +140,15 @@ class UploadFile
         if ( !$this->checkFileSize($file) ) {
             return false;
         }
+
+        if ( !$this->checkFileType($file) ) {
+            return false;
+        }
         return true;
     }
 
     /**
-     * Takes reference to current file in $_FILES array as argument
+     * Takes reference to current file in $_FILES superglobal array
      * Using switch statement adds error messages to messages array
      * for different error level
      *
@@ -163,7 +174,7 @@ class UploadFile
     }
 
     /**
-     * Takes reference to current file in $_FILES array as argument
+     * Takes reference to current file in $_FILES superglobal array as argument
      * Returns false if file is empty or larger than maximum size, otherwise returns true
      *
      * @param $file Array
@@ -182,6 +193,15 @@ class UploadFile
         }
     }
 
+    protected function checkFileType($file)
+    {
+        if ( in_array($file["type"], $this->allowedTypes) ) {
+            return true;
+        } else {
+            $this->messages[] = $file["name"] . " is not permitted file type.";
+            return false;
+        }
+    }
 
     protected function moveFile($file)
     {
