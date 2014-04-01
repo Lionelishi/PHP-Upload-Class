@@ -22,6 +22,7 @@ class UploadFile
         "image/png",
         "application/pdf"
     );
+    protected $newName;
 
 
     /**
@@ -44,6 +45,7 @@ class UploadFile
         $this->destination = $uploadDir;
     }
 
+
     /**
      * Method for changing max file size. If the new size exceed server limit
      * throws new Exception
@@ -62,6 +64,7 @@ class UploadFile
             $this->maxSize = $bytes;
         }
     }
+
 
     /**
      * Converts max file size configured on server to bytes
@@ -88,9 +91,12 @@ class UploadFile
         return $value;
     }
 
+
     /**
+     * Converts bytes into KB and MB
+     *
      * @param $bytes integer
-     * @return string size in KB / MB
+     * @return string
      */
     public static function convertFromBytes($bytes)
     {
@@ -101,6 +107,7 @@ class UploadFile
             return number_format($bytes, 1) . "KB";
         }
     }
+
 
     /**
      * Calls method for checking file and if error code is 0 calls move method
@@ -121,6 +128,7 @@ class UploadFile
     public function getMessages() {
         return $this->messages;
     }
+
 
     /**
      * Takes reference to current file in $_FILES array as argument
@@ -144,8 +152,12 @@ class UploadFile
         if ( !$this->checkFileType($file) ) {
             return false;
         }
+
+        $this->clearName($file);
+
         return true;
     }
+
 
     /**
      * Takes reference to current file in $_FILES superglobal array
@@ -173,6 +185,7 @@ class UploadFile
         }
     }
 
+
     /**
      * Takes reference to current file in $_FILES superglobal array as argument
      * Returns false if file is empty or larger than maximum size, otherwise returns true
@@ -193,6 +206,14 @@ class UploadFile
         }
     }
 
+
+    /**
+     * Checks if current file type is in array of allowed types and updates messages array
+     * if it's not.
+     *
+     * @param $file Array
+     * @return bool
+     */
     protected function checkFileType($file)
     {
         if ( in_array($file["type"], $this->allowedTypes) ) {
@@ -203,9 +224,31 @@ class UploadFile
         }
     }
 
+
+    /**
+     * Method for replacing white spaces in file name with underscores
+     *
+     * @param $file Array
+     */
+    protected function clearName($file)
+    {
+        $this->newName = null;
+        $noSpaces = str_replace(" ", "_", $file["name"]);
+        if ( $noSpaces != $file["name"] ) {
+            $this->newName = $noSpaces;
+        }
+    }
+
+
     protected function moveFile($file)
     {
-        $this->messages[] = $file['name'] . " was uploaded successfully";
+        $message = $file['name'] . " was uploaded successfully";
+        if ( !is_null($this->newName) ) {
+            $message .= ", and was renamed as " . $this->newName;
+        }
+        $message .= ".";
+
+        $this->messages[] = $message;
     }
 
 } 
