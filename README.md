@@ -12,8 +12,9 @@
 <ul>
 <li>Handles single or multiple files uploads</li>
 <li>Easy to configure</li>
+</ul>
 
-#Default Settings
+##Default Settings
 
 <ul>
 <li>Maximum file size set to 50KB</li>
@@ -26,7 +27,7 @@ All of these can be changed easy by calling public methods.
 
 ####To avoid compatibility issues class uses namespace (PHP 5.3 or later required).
 
-#Usage
+##Usage
 
 <p>Before including class in your php page, import namespace with </p>
 <pre>
@@ -37,7 +38,7 @@ All of these can be changed easy by calling public methods.
 <code>$upload = new UploadFile($destination);</code>
 </pre>
 
-Class has 4 public methods:
+###Class has 4 public methods:
 
 <strong>setMaxFileSize() - optional</strong> - Changes the file size limit for individual files. Takes a single argument which must be expressed as number of bytes.
 <pre>
@@ -64,3 +65,16 @@ $messages = array();
 $messages = $upload->getMessages();
 </code>
 </pre>
+
+### Static methods
+There are two static methods: <strong>convertFromBytes()</strong> and <strong>convertToBytes()</strong> that convert bytes into human readable size, and server limit
+into bytes.
+<pre>
+<code>
+UploadFile::convertFromBytes($bytes);
+UploadFile::convertToBytes($value);
+</code>
+</pre>
+
+<hr>
+<strong>Note: </strong> On demo, add margin-top of 100px at least to see form fields.
