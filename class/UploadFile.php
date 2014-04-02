@@ -14,7 +14,7 @@ class UploadFile
 
     protected $destination;
     protected $messages = array();
-    protected $maxSize = 102400; // bytes
+    protected $maxSize = 51200; // bytes
     protected $allowedTypes = array("image/jpeg", "image/pjpeg", "image/gif", "image/png", "application/pdf");
     protected $newName;
     protected $typeCheckingOn = true;
@@ -307,6 +307,11 @@ class UploadFile
     }
 
 
+    /**
+     * Method that move uploaded files to destination.
+     *
+     * @param $file Array
+     */
     protected function moveFile($file)
     {
         $fileName = isset($this->newName) ? $this->newName : $file["name"];
